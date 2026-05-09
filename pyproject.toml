@@ -114,5 +114,4 @@ omit = [
     "tests/*",
     "*/test_*.py",
     "*/__version__.py",
-    "*/contrib/*",
 ]

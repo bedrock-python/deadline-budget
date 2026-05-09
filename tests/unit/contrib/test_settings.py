@@ -4,6 +4,8 @@ import pytest
 
 from deadline_budget.contrib.settings import BaseDeadlineSettings, OperationDeadlineConfig
 
+pytestmark = pytest.mark.unit
+
 
 def test__operation_config__defaults__returns_expected_values() -> None:
     # Arrange & Act

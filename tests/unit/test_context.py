@@ -6,6 +6,8 @@ import pytest
 
 from deadline_budget import BudgetContext, DeadlineExceededError
 
+pytestmark = pytest.mark.unit
+
 
 def test__budget_context__create_with_call_caps__creates_context_with_caps() -> None:
     # Arrange

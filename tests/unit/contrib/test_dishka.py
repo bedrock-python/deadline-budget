@@ -2,6 +2,7 @@
 
 from enum import Enum
 
+import pytest
 from dishka import Scope
 
 from deadline_budget.contrib.dishka import (
@@ -10,6 +11,8 @@ from deadline_budget.contrib.dishka import (
     DeadlineSettingsProtocol,
     OperationDeadlineConfigProtocol,
 )
+
+pytestmark = pytest.mark.unit
 
 
 class MockOperationConfig:
