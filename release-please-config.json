@@ -8,7 +8,8 @@
       "extra-files": [
         {
           "type": "generic",
-          "path": "deadline_budget/__version__.py"
+          "path": "deadline_budget/__version__.py",
+          "search": "__version__ = \"$1\""
         }
       ]
     }
