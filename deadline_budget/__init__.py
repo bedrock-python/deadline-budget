@@ -6,4 +6,4 @@ from .errors import DeadlineExceededError
 
 __all__ = ["BudgetContext", "DeadlineBudget", "DeadlineExceededError"]
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
