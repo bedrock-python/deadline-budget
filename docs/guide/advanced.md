@@ -221,6 +221,50 @@ result = await call_with_retry(
 )
 ```
 
+## Composing `DeadlineExceededError` into Your Error Hierarchy
+
+Services with their own error taxonomy often want one error that is *both* a `DeadlineExceededError` — so
+`except DeadlineExceededError` keeps catching it — and a domain error the transport layer already knows how to
+map (for example to HTTP 504). `DeadlineExceededError` initialises `Exception` directly rather than through
+`super()`, so it can be listed alongside a base whose `__init__` takes something other than a message string:
+
+```python
+from deadline_budget import BudgetContext, DeadlineExceededError
+
+class DomainError(Exception):
+    """Application error carrying a structured payload instead of a message string."""
+
+    def __init__(self, error: Error, *, is_public: bool = False) -> None:
+        self.error = error
+        self.is_public = is_public
+        super().__init__(error.code)
+
+class RequestDeadlineExceededError(DeadlineExceededError, DomainError):
+    def __init__(self, budget_seconds: float, elapsed_seconds: float) -> None:
+        DeadlineExceededError.__init__(self, budget_seconds, elapsed_seconds)
+        DomainError.__init__(self, Error("REQUEST_DEADLINE_EXCEEDED", 504), is_public=True)
+
+async def register_user(ctx: BudgetContext, email: str) -> User:
+    try:
+        return await identity_service.create_user(
+            email=email,
+            timeout=ctx.timeout_for_call("identity_create_user"),
+        )
+    except DeadlineExceededError as exc:
+        raise RequestDeadlineExceededError(exc.budget_seconds, exc.elapsed_seconds) from exc
+```
+
+Two rules keep this working:
+
+1. **List `DeadlineExceededError` first.** A base that calls `super().__init__()` hands its arguments to whatever
+   comes next in the MRO; placed before `DeadlineExceededError`, the `DomainError` above would pass `error.code`
+   into `DeadlineExceededError.__init__`.
+2. **Call each base's `__init__` explicitly.** The two bases take different arguments, so a single
+   `super().__init__()` chain cannot serve both.
+
+Whichever base initialises `Exception` last sets `exc.args` and therefore `str(exc)`; `budget_seconds` and
+`elapsed_seconds` are set on the instance regardless of order.
+
 ## Integration with Observability
 
 Integrate with OpenTelemetry or other tracing:
