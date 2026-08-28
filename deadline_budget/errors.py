@@ -1,11 +1,16 @@
 """Exceptions for deadline budget tracking."""
 
+from __future__ import annotations
+
+from typing import Any
+
 
 class DeadlineExceededError(Exception):
     """Raised when request deadline budget is exhausted.
 
     Initialises ``Exception`` directly rather than via ``super()``, so it is safe to use as the first base
     of a class that also inherits from an exception with an incompatible ``__init__`` signature.
+    Round-trips through ``pickle`` and ``copy`` with both attributes intact.
 
     Attributes:
         budget_seconds: Usable budget in seconds (total minus safety margin).
@@ -21,3 +26,7 @@ class DeadlineExceededError(Exception):
             self,
             f"Request deadline exceeded: {elapsed_seconds:.2f}s elapsed, budget was {budget_seconds:.2f}s",
         )
+
+    def __reduce__(self) -> tuple[type[DeadlineExceededError], tuple[float, float], dict[str, Any]]:
+        # BaseException pickles self.args, which holds the message rather than the constructor arguments.
+        return type(self), (self.budget_seconds, self.elapsed_seconds), self.__dict__
