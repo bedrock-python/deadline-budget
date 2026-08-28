@@ -58,7 +58,7 @@ result2 = await credential_service.set_password(user_id=..., timeout=timeout2)
 
 # Check if budget exhausted
 if budget.expired():
-    raise DeadlineExceededError("Request deadline exceeded")
+    raise DeadlineExceededError(budget_seconds=budget.total_seconds, elapsed_seconds=budget.elapsed())
 
 # Or raise exception if expired
 budget.check_expired()
@@ -216,4 +216,4 @@ async def register_user(email: str, password: str) -> User:
 ## Next Steps
 
 - [Configuration Guide](configuration.md) — Advanced configuration options
-- [API Reference](../reference/api.md) — Complete API documentation
+- [API Reference](../reference/index.md) — Complete API documentation

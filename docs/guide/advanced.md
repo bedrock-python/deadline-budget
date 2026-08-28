@@ -197,8 +197,7 @@ async def call_with_retry(
 ):
     """Retry with progressively smaller timeouts."""
     for attempt in range(max_retries + 1):
-        if budget.expired():
-            raise DeadlineExceededError("Budget exhausted before retry")
+        budget.check_expired()
 
         # Reduce cap on retries
         retry_cap = cap / (attempt + 1)
@@ -294,15 +293,14 @@ async def traced_orchestration():
 
 ## Testing with Budgets
 
-Mock time for deterministic tests:
+Mock `time.monotonic` — the clock `DeadlineBudget` reads — for deterministic tests:
 
 ```python
 from unittest.mock import patch
 from deadline_budget import DeadlineBudget
-import time
 
 def test_budget_exhaustion():
-    with patch("time.perf_counter") as mock_time:
+    with patch("time.monotonic") as mock_time:
         mock_time.return_value = 0.0
         budget = DeadlineBudget(total_seconds=10.0, safety_margin=0.5)
 
