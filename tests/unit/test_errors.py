@@ -1,5 +1,8 @@
 """Unit tests for DeadlineExceededError."""
 
+import copy
+import pickle
+
 import pytest
 
 from deadline_budget import DeadlineExceededError
@@ -72,6 +75,51 @@ def test__deadline_exceeded_error__multiply_inherited_subclass__is_caught_by_exc
     assert isinstance(exc_info.value, DomainError)
     assert exc_info.value.budget_seconds == 10.0
     assert exc_info.value.elapsed_seconds == 12.5
+
+
+def test__deadline_exceeded_error__pickle_round_trip__restores_attributes_and_message() -> None:
+    # Arrange
+    exc = DeadlineExceededError(budget_seconds=10.0, elapsed_seconds=12.5)
+
+    # Act
+    restored = pickle.loads(pickle.dumps(exc))  # noqa: S301
+
+    # Assert
+    assert isinstance(restored, DeadlineExceededError)
+    assert restored.budget_seconds == 10.0
+    assert restored.elapsed_seconds == 12.5
+    assert str(restored) == "Request deadline exceeded: 12.50s elapsed, budget was 10.00s"
+    assert restored.args == exc.args
+
+
+def test__deadline_exceeded_error__deepcopy__restores_attributes_and_message() -> None:
+    # Arrange
+    exc = DeadlineExceededError(budget_seconds=10.0, elapsed_seconds=12.5)
+
+    # Act
+    copied = copy.deepcopy(exc)
+
+    # Assert
+    assert copied is not exc
+    assert copied.budget_seconds == 10.0
+    assert copied.elapsed_seconds == 12.5
+    assert str(copied) == str(exc)
+
+
+def test__deadline_exceeded_error__multiply_inherited_subclass__pickle_round_trip_keeps_both_sets() -> None:
+    # Arrange
+    exc = RequestDeadlineExceededError(budget_seconds=10.0, elapsed_seconds=12.5)
+
+    # Act
+    restored = pickle.loads(pickle.dumps(exc))  # noqa: S301
+
+    # Assert
+    assert isinstance(restored, RequestDeadlineExceededError)
+    assert restored.budget_seconds == 10.0
+    assert restored.elapsed_seconds == 12.5
+    assert restored.error.code == "REQUEST_DEADLINE_EXCEEDED"
+    assert restored.error.status == 504
+    assert restored.is_public is True
 
 
 def test__deadline_exceeded_error__subclass_calling_super_init__keeps_message() -> None:
