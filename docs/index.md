@@ -111,5 +111,5 @@ await service_c.call(..., timeout=budget.timeout_for(cap=5.0))  # Uses min(5.0, 
 ## Next Steps
 
 - [Quickstart Guide](guide/quickstart.md) — Step-by-step setup and usage
-- [API Reference](reference/api.md) — Complete API documentation
+- [API Reference](reference/index.md) — Complete API documentation
 - [GitHub Repository](https://github.com/bedrock-python/deadline-budget)
