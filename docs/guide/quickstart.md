@@ -139,6 +139,9 @@ budget = DeadlineBudget(total_seconds=10.0, min_timeout=0.1)
 
 **Default:** 0.1 seconds
 
+The floor wins over the remaining budget, so the last call before exhaustion can be granted
+more time than is left. The safety margin pays for that.
+
 ### `cap`
 
 Maximum timeout for a specific call:
@@ -150,6 +153,10 @@ timeout = budget.timeout_for(cap=5.0)
 # If remaining is 3s, returns 3s (under cap)
 timeout = budget.timeout_for(cap=5.0)
 ```
+
+The cap is applied after the floor, so a cap below `min_timeout` wins over it:
+`timeout_for(cap=0.05)` with `min_timeout=0.1` returns 0.05. The
+[configuration guide](configuration.md) spells out the full precedence.
 
 ### `reserve_for_next`
 

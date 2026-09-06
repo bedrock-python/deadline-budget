@@ -77,8 +77,8 @@ class BudgetContext:
             reserve_for_next: Reserve this many seconds for subsequent steps.
 
         Returns:
-            Computed timeout in seconds, bounded by [min_timeout, call_cap] if cap exists,
-            or [min_timeout, remaining] if no cap configured.
+            Computed timeout in seconds, from DeadlineBudget.timeout_for with the configured cap.
+            May exceed the remaining budget when min_timeout does.
 
         Raises:
             DeadlineExceededError: If remaining budget is already exhausted.
