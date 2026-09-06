@@ -9,6 +9,15 @@ Request deadline budget tracking for distributed orchestrations
 [![codecov](https://codecov.io/gh/bedrock-python/deadline-budget/graph/badge.svg)](https://codecov.io/gh/bedrock-python/deadline-budget)
 [![Docs](https://img.shields.io/badge/docs-online-blue)](https://bedrock-python.github.io/deadline-budget/)
 
+> [!TIP]
+> **Building this with an AI assistant?** Hand it
+> **[one page](https://bedrock-python.github.io/deadline-budget/agents/)** instead of the
+> whole site: the whole API surface, how a budget crosses a process boundary and what
+> happens when one runs out, the rules that break code when they are broken, the mistakes
+> models actually make, and a map of which page to fetch for the rest. Every docs page is
+> also served as raw Markdown at its own URL, and a **Copy page** button at the top of each
+> one hands it straight to a chat window.
+
 ## Installation
 
 ```bash
@@ -55,6 +64,10 @@ ctx.check_expired()  # Raises DeadlineExceededError if expired
 ## Documentation
 
 Full documentation at [bedrock-python.github.io/deadline-budget](https://bedrock-python.github.io/deadline-budget/).
+
+- [For AI agents](https://bedrock-python.github.io/deadline-budget/agents/) — the whole API
+  surface, the rules that break code when broken and a map of the rest, on one page to hand
+  to a coding assistant
 
 ## License
 
