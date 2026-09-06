@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class OperationDeadlineConfig(BaseModel):
@@ -28,6 +28,9 @@ class OperationDeadlineConfig(BaseModel):
     )
     calls_caps: dict[str, float] = Field(
         default_factory=dict,
+        # "call_caps" is the spelling BudgetContext uses; accepted here so the near-miss
+        # does not silently build a config with no caps at all.
+        validation_alias=AliasChoices("calls_caps", "call_caps"),
         description="Per-call timeout caps (key: call_name, value: seconds)",
     )
 

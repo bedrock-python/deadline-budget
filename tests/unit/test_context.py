@@ -36,6 +36,33 @@ def test__budget_context__create_without_caps__creates_context_with_empty_caps()
     assert ctx.call_caps == {}
 
 
+def test__budget_context__caps_mutated_after_create__keeps_the_caps_it_was_created_with() -> None:
+    # Arrange
+    call_caps = {"identity_create_user": 5.0}
+    ctx = BudgetContext.create(total_seconds=10.0, call_caps=call_caps)
+
+    # Act
+    call_caps["identity_create_user"] = 0.5
+    call_caps["credential_set_password"] = 0.5
+
+    # Assert
+    assert ctx.call_caps == {"identity_create_user": 5.0}
+    assert ctx.timeout_for_call("identity_create_user") == 5.0
+
+
+def test__budget_context__context_caps_mutated__leaves_the_caps_passed_in_untouched() -> None:
+    # Arrange
+    call_caps = {"identity_create_user": 5.0}
+    ctx = BudgetContext.create(total_seconds=10.0, call_caps=call_caps)
+
+    # Act
+    ctx.call_caps["identity_create_user"] = 0.5
+
+    # Assert
+    assert call_caps == {"identity_create_user": 5.0}
+    assert ctx.timeout_for_call("identity_create_user") == 0.5
+
+
 def test__budget_context__timeout_for_call_with_cap__applies_call_specific_cap() -> None:
     # Arrange
     call_caps = {

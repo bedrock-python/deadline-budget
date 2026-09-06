@@ -71,13 +71,17 @@ class DeadlineBudget:
     ) -> float:
         """Compute timeout for the next downstream call.
 
+        The remaining budget, less reserve_for_next, raised to min_timeout and then limited by cap.
+        Both bounds outrank what is left: min_timeout is returned even when the budget holds less
+        than that, and cap is applied last, so a cap below min_timeout wins over it.
+
         Args:
             cap: Maximum allowed timeout for this call (service-level cap).
             min_timeout: Minimum timeout override (default: use budget min_timeout).
             reserve_for_next: Reserve this many seconds for subsequent steps.
 
         Returns:
-            Computed timeout in seconds, bounded by [min_timeout, cap].
+            Computed timeout in seconds. May exceed the remaining budget when min_timeout does.
 
         Raises:
             DeadlineExceededError: If remaining budget is already exhausted.

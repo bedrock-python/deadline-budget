@@ -134,10 +134,10 @@ classmethod instead:
 | `timeout_for_call(call_name, reserve_for_next=0.0)` | `float` | `budget.timeout_for(cap=call_caps.get(call_name), reserve_for_next=…)`. An unknown name is not an error — it means no cap. |
 | `check_expired()` / `remaining()` / `elapsed()` / `expired()` | as above | Straight delegation to the budget. |
 | `budget` (property) | `DeadlineBudget` | The underlying budget, for anything the context does not expose. |
-| `call_caps` (property) | `dict[str, float]` | The live mapping, not a copy. |
+| `call_caps` (property) | `dict[str, float]` | The context's own mapping — a copy of what was passed in, live for every later call on this context. |
 
 There is no `timeout_for` on `BudgetContext` and no `call_caps` mutator; reach through
-`ctx.budget` or edit the dict you passed in.
+`ctx.budget`, or mutate `ctx.call_caps` in place.
 
 ### `deadline_budget.contrib.settings` — extra `settings`, needs Pydantic 2
 
@@ -146,7 +146,7 @@ environment variables of their own.
 
 | Name | Fields |
 |---|---|
-| `OperationDeadlineConfig` | `budget_timeout: float = 10.0` (1.0–60.0), `safety_margin: float | None = None` (0.0–5.0), `min_timeout: float | None = None` (0.01–1.0), `calls_caps: dict[str, float] = {}` |
+| `OperationDeadlineConfig` | `budget_timeout: float = 10.0` (1.0–60.0), `safety_margin: float | None = None` (0.0–5.0), `min_timeout: float | None = None` (0.01–1.0), `calls_caps: dict[str, float] = {}` (also accepted as `call_caps` on input) |
 | `BaseDeadlineSettings` | `operations: dict[str, OperationDeadlineConfig] = {}`, `default_budget_timeout: float = 10.0`, `default_safety_margin: float = 0.5`, `default_min_timeout: float = 0.1` |
 
 `BaseDeadlineSettings.config_for_operation(operation)` returns the entry for that name, or
@@ -250,10 +250,11 @@ watching the clock.
 8. **An unknown `call_name` is not an error.** `timeout_for_call("typo")` returns the full
    remaining budget, uncapped. Caps are looked up with `dict.get`, so a misspelled or
    renamed key removes the ceiling instead of reporting it. Keep the keys in one constant.
-9. **The settings field is `calls_caps`; the context argument is `call_caps`.** The names
-   differ by one letter and Pydantic ignores unknown keys by default, so
-   `OperationDeadlineConfig(call_caps={...})` builds a config with no caps at all and no
-   complaint.
+9. **The settings field is `calls_caps`; the context argument is `call_caps`.**
+   `OperationDeadlineConfig` accepts either spelling as input and stores the value under
+   `calls_caps` — that is the name to read it back under, the name it dumps to, and the
+   name `OperationDeadlineConfigProtocol` requires. Every other field is matched exactly,
+   and Pydantic still ignores keys it does not know.
 10. **`BaseDeadlineSettings` is a `BaseModel`, not a `BaseSettings`,** despite the extra
     being called `settings`. It reads no environment and no `.env`; nest it inside your own
     `pydantic_settings.BaseSettings` if you want that.
@@ -264,8 +265,11 @@ watching the clock.
 12. **A budget is immutable after construction**, so reading it from several tasks or
     threads is safe. What is not safe is assuming those readers are sharing the time: see
     fan-out above.
-13. **`ctx.call_caps` is the live dict.** Mutating what you get back — or the dict you
-    passed to `create()` — changes the caps for every later call.
+13. **`ctx.call_caps` is the context's own dict.** The mapping handed to `BudgetContext`
+    is copied at construction, so changing the dict you passed to `create()` afterwards
+    changes nothing — and a context built from settings cannot write back into them.
+    Mutating what the property returns does change the caps for every later call, on that
+    context only.
 14. **The contrib modules are not re-exported.** `deadline_budget` exports exactly
     `DeadlineBudget`, `BudgetContext` and `DeadlineExceededError`. Everything else is
     imported from `deadline_budget.contrib.settings` or `deadline_budget.contrib.dishka`,

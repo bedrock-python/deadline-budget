@@ -35,6 +35,10 @@ budget = DeadlineBudget(total_seconds=10.0, min_timeout=0.1)
 timeout = budget.timeout_for()
 ```
 
+The floor outranks the budget: `timeout_for()` returns `min_timeout` even when less than that
+is left, so the last call before exhaustion can overrun the deadline by up to `min_timeout`.
+That is what the safety margin pays for.
+
 #### `safety_margin` (optional, default: 0.0)
 
 Reserve time subtracted from total budget to prevent deadline violations:
@@ -53,10 +57,10 @@ budget = DeadlineBudget(total_seconds=10.0, safety_margin=0.5)
 Compute timeout for next downstream call.
 
 ```python
-# No cap: returns remaining budget (or min_timeout if less)
+# No cap: returns remaining budget (or min_timeout if remaining is less)
 timeout = budget.timeout_for()
 
-# With cap: returns min(cap, remaining)
+# With cap: returns min(cap, remaining), and min_timeout if remaining is less than that
 timeout = budget.timeout_for(cap=5.0)
 
 # Reserve budget for subsequent calls
@@ -72,6 +76,22 @@ timeout = budget.timeout_for(min_timeout=0.5)
 - `reserve_for_next`: Reserve budget for future calls (default: 0.0)
 
 **Returns:** `float` — timeout in seconds
+
+**Precedence.** The whole computation is:
+
+```python
+available = max(remaining - reserve_for_next, min_timeout)
+timeout = min(available, cap) if cap is not None else available
+```
+
+Two consequences worth knowing before picking numbers:
+
+- **The floor outranks the budget.** With 0.4s left and `min_timeout=1.0`, `timeout_for()`
+  returns 1.0 — more time than the budget has. `reserve_for_next` disappears the same way:
+  when `remaining - reserve_for_next` falls under the floor, the floor wins and nothing is
+  reserved.
+- **The cap outranks the floor.** The cap is applied last, so `timeout_for(cap=0.05)` with
+  `min_timeout=0.1` returns 0.05. A service-level cap is never widened to reach the floor.
 
 ## BudgetContext Configuration
 
@@ -112,6 +132,9 @@ ctx = BudgetContext.create(total_seconds=10.0, call_caps=call_caps)
 **Behavior:**
 - Configured calls: Uses `min(cap, remaining_budget)`
 - Unconfigured calls: Uses `remaining_budget`
+
+Both go through `timeout_for()` and follow its precedence rules above, so `min_timeout` still
+applies underneath and a cap below `min_timeout` still wins.
 
 #### `min_timeout` (optional, default: 0.1)
 

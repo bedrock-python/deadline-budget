@@ -233,6 +233,28 @@ def test__factory__create_for_unknown_operation__uses_default_config() -> None:
     assert ctx.call_caps == {}
 
 
+def test__factory__context_caps_mutated__does_not_leak_into_the_next_context() -> None:
+    # Arrange
+    settings = MockSettings(
+        operations={
+            "signup": MockOperationConfig(
+                budget_timeout=10.0,
+                calls_caps={"identity_create": 3.0},
+            ),
+        }
+    )
+    factory = DeadlineContextFactory(settings)
+    first = factory.create_for_operation("signup")
+
+    # Act
+    first.call_caps["identity_create"] = 0.5
+
+    # Assert
+    second = factory.create_for_operation("signup")
+    assert second.call_caps == {"identity_create": 3.0}
+    assert settings.config_for_operation("signup").calls_caps == {"identity_create": 3.0}
+
+
 def test__deadline_provider__scope__is_app_scope() -> None:
     # Arrange
     provider = DeadlineProvider()

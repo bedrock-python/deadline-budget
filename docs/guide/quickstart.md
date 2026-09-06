@@ -128,6 +128,10 @@ budget = DeadlineBudget(total_seconds=10.0, safety_margin=0.5)
 
 **Why use this?** Prevents returning timeouts that expire during network roundtrip.
 
+What you get back is the usable budget, not the total you passed: `budget.total_seconds` is
+9.5 here, and `DeadlineExceededError.budget_seconds` reports the same 9.5. Keep your own
+constant if a log line or a metric needs the 10.0.
+
 ### `min_timeout`
 
 Minimum timeout value returned by `timeout_for()`:
@@ -138,6 +142,9 @@ budget = DeadlineBudget(total_seconds=10.0, min_timeout=0.1)
 ```
 
 **Default:** 0.1 seconds
+
+The floor wins over the remaining budget, so the last call before exhaustion can be granted
+more time than is left. The safety margin pays for that.
 
 ### `cap`
 
@@ -150,6 +157,10 @@ timeout = budget.timeout_for(cap=5.0)
 # If remaining is 3s, returns 3s (under cap)
 timeout = budget.timeout_for(cap=5.0)
 ```
+
+The cap is applied after the floor, so a cap below `min_timeout` wins over it:
+`timeout_for(cap=0.05)` with `min_timeout=0.1` returns 0.05. The
+[configuration guide](configuration.md) spells out the full precedence.
 
 ### `reserve_for_next`
 

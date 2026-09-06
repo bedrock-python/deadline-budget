@@ -95,7 +95,10 @@ class DeadlineContextFactory:
 class DeadlineProvider(Provider):
     """Generic Dishka provider for request deadline budgeting.
 
-    Provides DeadlineContextFactory and optionally per-request BudgetContext.
+    Provides DeadlineContextFactory, and requires a DeadlineSettingsProtocol binding from one of
+    your own providers. It does not provide BudgetContext: a context belongs to one operation and
+    its countdown starts when it is built, so build it with DeadlineContextFactory.create_for_operation
+    where the request starts.
     """
 
     scope = Scope.APP
