@@ -146,7 +146,7 @@ environment variables of their own.
 
 | Name | Fields |
 |---|---|
-| `OperationDeadlineConfig` | `budget_timeout: float = 10.0` (1.0–60.0), `safety_margin: float \| None = None` (0.0–5.0), `min_timeout: float \| None = None` (0.01–1.0), `calls_caps: dict[str, float] = {}` |
+| `OperationDeadlineConfig` | `budget_timeout: float = 10.0` (1.0–60.0), `safety_margin: float | None = None` (0.0–5.0), `min_timeout: float | None = None` (0.01–1.0), `calls_caps: dict[str, float] = {}` |
 | `BaseDeadlineSettings` | `operations: dict[str, OperationDeadlineConfig] = {}`, `default_budget_timeout: float = 10.0`, `default_safety_margin: float = 0.5`, `default_min_timeout: float = 0.1` |
 
 `BaseDeadlineSettings.config_for_operation(operation)` returns the entry for that name, or
