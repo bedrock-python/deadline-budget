@@ -7,9 +7,12 @@ Thank you for your interest in contributing! This document covers everything you
 ```bash
 git clone https://github.com/bedrock-python/deadline-budget.git
 cd deadline-budget
-uv sync --group dev
+uv sync --group dev --all-extras
 uv run pre-commit install --hook-type commit-msg
 ```
+
+`--all-extras` installs Pydantic and Dishka. They are optional for users of the library but
+not for its test suite: without them `tests/unit/contrib/` fails at collection.
 
 ## Running checks
 
