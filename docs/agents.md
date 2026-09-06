@@ -146,7 +146,7 @@ environment variables of their own.
 
 | Name | Fields |
 |---|---|
-| `OperationDeadlineConfig` | `budget_timeout: float = 10.0` (1.0–60.0), `safety_margin: float | None = None` (0.0–5.0), `min_timeout: float | None = None` (0.01–1.0), `calls_caps: dict[str, float] = {}` |
+| `OperationDeadlineConfig` | `budget_timeout: float = 10.0` (1.0–60.0), `safety_margin: float | None = None` (0.0–5.0), `min_timeout: float | None = None` (0.01–1.0), `calls_caps: dict[str, float] = {}` (also accepted as `call_caps` on input) |
 | `BaseDeadlineSettings` | `operations: dict[str, OperationDeadlineConfig] = {}`, `default_budget_timeout: float = 10.0`, `default_safety_margin: float = 0.5`, `default_min_timeout: float = 0.1` |
 
 `BaseDeadlineSettings.config_for_operation(operation)` returns the entry for that name, or
@@ -250,10 +250,11 @@ watching the clock.
 8. **An unknown `call_name` is not an error.** `timeout_for_call("typo")` returns the full
    remaining budget, uncapped. Caps are looked up with `dict.get`, so a misspelled or
    renamed key removes the ceiling instead of reporting it. Keep the keys in one constant.
-9. **The settings field is `calls_caps`; the context argument is `call_caps`.** The names
-   differ by one letter and Pydantic ignores unknown keys by default, so
-   `OperationDeadlineConfig(call_caps={...})` builds a config with no caps at all and no
-   complaint.
+9. **The settings field is `calls_caps`; the context argument is `call_caps`.**
+   `OperationDeadlineConfig` accepts either spelling as input and stores the value under
+   `calls_caps` — that is the name to read it back under, the name it dumps to, and the
+   name `OperationDeadlineConfigProtocol` requires. Every other field is matched exactly,
+   and Pydantic still ignores keys it does not know.
 10. **`BaseDeadlineSettings` is a `BaseModel`, not a `BaseSettings`,** despite the extra
     being called `settings`. It reads no environment and no `.env`; nest it inside your own
     `pydantic_settings.BaseSettings` if you want that.

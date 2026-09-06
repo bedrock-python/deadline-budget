@@ -43,6 +43,29 @@ def test__operation_config__with_custom_values__stores_all_fields() -> None:
     }
 
 
+def test__operation_config__with_call_caps_spelling__populates_calls_caps() -> None:
+    # Arrange
+    caps = {"identity_create_user": 3.0}
+
+    # Act
+    config = OperationDeadlineConfig(call_caps=caps)
+
+    # Assert
+    assert config.calls_caps == caps
+
+
+def test__operation_config__dump__keeps_calls_caps_as_the_field_name() -> None:
+    # Arrange
+    config = OperationDeadlineConfig(call_caps={"identity_create_user": 3.0})
+
+    # Act
+    dumped = config.model_dump()
+
+    # Assert
+    assert dumped["calls_caps"] == {"identity_create_user": 3.0}
+    assert "call_caps" not in dumped
+
+
 @pytest.mark.parametrize(
     "invalid_timeout,reason",
     [
