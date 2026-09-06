@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3](https://github.com/bedrock-python/deadline-budget/compare/deadline-budget-v0.1.2...deadline-budget-v0.1.3) (2026-09-06)
+
+
+### Documentation
+
+* org-wide security policy and code of conduct ([#16](https://github.com/bedrock-python/deadline-budget/issues/16)) ([c5b6ecb](https://github.com/bedrock-python/deadline-budget/commit/c5b6ecb2288fb93f2137b03b11cc1362a5c48705))
+
 ## [0.1.2](https://github.com/bedrock-python/deadline-budget/compare/deadline-budget-v0.1.1...deadline-budget-v0.1.2) (2026-08-28)
 
 
