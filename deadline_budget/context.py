@@ -35,9 +35,10 @@ class BudgetContext:
             budget: The underlying DeadlineBudget instance.
             call_caps: Mapping of call names to their timeout caps in seconds.
                 If a call is not in this dict, it will use remaining budget without cap.
+                Copied, so the context is not tied to the lifetime of the mapping given.
         """
         self._budget: DeadlineBudget = budget
-        self._call_caps: dict[str, float] = call_caps
+        self._call_caps: dict[str, float] = dict(call_caps)
 
     @classmethod
     def create(
@@ -115,5 +116,5 @@ class BudgetContext:
 
     @property
     def call_caps(self) -> dict[str, float]:
-        """Access to configured call caps."""
+        """Access to this context's own copy of the configured call caps."""
         return self._call_caps
