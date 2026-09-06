@@ -128,6 +128,10 @@ budget = DeadlineBudget(total_seconds=10.0, safety_margin=0.5)
 
 **Why use this?** Prevents returning timeouts that expire during network roundtrip.
 
+What you get back is the usable budget, not the total you passed: `budget.total_seconds` is
+9.5 here, and `DeadlineExceededError.budget_seconds` reports the same 9.5. Keep your own
+constant if a log line or a metric needs the 10.0.
+
 ### `min_timeout`
 
 Minimum timeout value returned by `timeout_for()`:

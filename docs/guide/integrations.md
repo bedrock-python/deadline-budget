@@ -6,6 +6,12 @@ Extensions for deadline-budget with popular libraries.
 
 Install with: `pip install deadline-budget[settings]`
 
+Despite the name of the extra, `BaseDeadlineSettings` and `OperationDeadlineConfig` are plain
+`pydantic.BaseModel` classes, not `pydantic_settings.BaseSettings`. They read no environment
+variables and no `.env` file of their own; they hold the values you give them. Nest them in
+whatever your application already loads configuration into — a `BaseSettings` subclass if that
+is where your configuration comes from — as `AppSettings` does below.
+
 ### Configuration Classes
 
 ```python
